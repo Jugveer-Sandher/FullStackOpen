@@ -5,6 +5,16 @@ import Persons from './components/Persons'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import personService from './services/persons'
+import './app.css'
+
+const Notification = ({ message }) => {
+  if (message == '') return null
+  return (
+    <div className='message'>
+      <h5>{message}</h5>
+    </div>
+  )
+}
 
 
 const App = () => {
@@ -12,6 +22,7 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [search, setSearch] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     personService
@@ -38,8 +49,10 @@ const App = () => {
       if(window.confirm(text)) {
         personService
           .update(duplicatePerson.id, newPerson)
-          .then(persons => {
+          .then(res => {
             setPersons(persons.map(p => p.id !== duplicatePerson.id ? p : res.data))
+            setMessage(`Person ${duplicatePerson.name} phone number was updated`);
+            setTimeout(() => setMessage(''), 5000);
           })  
       }
     } 
@@ -48,6 +61,8 @@ const App = () => {
         .create(newPerson)
         .then(createdPerson => {
           setPersons([...persons, createdPerson]);
+          setMessage(`Person ${createdPerson.name} was added`);
+          setTimeout(() => setMessage(''), 5000);
         });
     }
 
@@ -70,6 +85,8 @@ const App = () => {
         .deletePerson(id)
         .then(() => {
           setPersons(persons.filter(person => person.id !== id));
+          setMessage(`Person ${person.name} was deleted`);
+          setTimeout(() => setMessage(''), 5000);
         })
         .catch(err => {
           console.log(`error deleting person: ${error}`);
@@ -85,6 +102,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message}/>
       <Filter serach={search} searchChange={handleSearchChange} />
 
       <h2>Add a new contact</h2>
